@@ -46,33 +46,50 @@ class PDFExtractor:
             full_text = full_text[:15000] + "..."
         
         prompt = f"""
-        Analyze the following PDF content and extract:
-        1. The document title (main title of the document)
-        2. A structured outline with heading levels and page numbers
+        You are an expert document analyzer. Extract the document title and create a structured outline from the following PDF content.
 
-        For the outline, identify headings at different levels:
-        - H1: Main headings/chapters
-        - H2: Sub-headings under H1
-        - H3: Sub-headings under H2  
-        - H4: Sub-headings under H3
+        IMPORTANT RULES:
+        1. TITLE EXTRACTION:
+           - Find the main document title (usually at the top of first page)
+           - Clean up any OCR artifacts (repeated characters like RRRR, FFFF, etc.)
+           - If no clear title exists, leave as empty string
+           - For certificates, extract the certificate name/title
+        
+        2. OUTLINE EXTRACTION:
+           - Only identify TRUE HEADINGS, not regular text or bullet points
+           - Look for: Chapter titles, Section headers, Major topic divisions
+           - DO NOT include: Numbered lists, bullet points, regular sentences, dates, or procedural text
+           - Heading indicators: Bold text, larger fonts, standalone lines, numbered sections (1., 2., etc.), ALL CAPS titles
+           
+        3. HEADING LEVELS:
+           - H1: Main chapters/major sections
+           - H2: Sub-sections under H1
+           - H3: Sub-sub-sections under H2
+           - H4: Minor subdivisions under H3
+        
+        4. SPECIAL CASES:
+           - Certificates: Usually have no outline structure (return empty outline)
+           - Forms: Field labels are NOT headings
+           - Lists: Individual list items are NOT headings
+        
+        5. CLEAN OUTPUT:
+           - Remove OCR artifacts and repeated characters
+           - Ensure proper capitalization
+           - Remove unnecessary punctuation from headings
 
-        Look for patterns like:
-        - Bold or capitalized text that appears to be headings
-        - Numbered sections (1., 2., 1.1, 1.2, etc.)
-        - Text that stands alone on lines
-        - Chapter titles, section titles, appendices
-
-        Return the result in this exact JSON format:
+        Return ONLY valid JSON in this exact format:
         {{
-            "title": "Document Title Here",
+            "title": "Clean Document Title Here",
             "outline": [
                 {{
                     "level": "H1",
-                    "text": "Heading text",
+                    "text": "Clean Heading Text",
                     "page": 1
                 }}
             ]
         }}
+
+        If the document has no clear heading structure (like certificates, simple forms), return an empty outline array.
 
         PDF Content:
         {full_text}
@@ -96,16 +113,36 @@ class PDFExtractor:
             if 'outline' not in result:
                 result['outline'] = []
             
+            # Clean title - remove OCR artifacts
+            if result['title']:
+                title = result['title']
+                # Remove repeated characters pattern (RRRR, FFFF, etc.)
+                import re
+                title = re.sub(r'([A-Z])\1{3,}', r'\1', title)  # Remove 4+ repeated caps
+                title = re.sub(r'([a-z])\1{3,}', r'\1', title)  # Remove 4+ repeated lowercase
+                title = re.sub(r':::+', ':', title)  # Clean up multiple colons
+                title = re.sub(r'\s+', ' ', title)  # Clean up multiple spaces
+                result['title'] = title.strip()
+            
             # Clean outline entries
             cleaned_outline = []
             for item in result['outline']:
                 if isinstance(item, dict) and 'level' in item and 'text' in item and 'page' in item:
-                    cleaned_item = {
-                        'level': str(item['level']),
-                        'text': str(item['text']).strip(),
-                        'page': int(item['page']) if isinstance(item['page'], (int, str)) and str(item['page']).isdigit() else 0
-                    }
-                    cleaned_outline.append(cleaned_item)
+                    text = str(item['text']).strip()
+                    
+                    # Skip if this looks like regular text rather than a heading
+                    if self._is_likely_heading(text):
+                        # Clean the heading text
+                        text = re.sub(r'([A-Z])\1{3,}', r'\1', text)  # Remove repeated caps
+                        text = re.sub(r'([a-z])\1{3,}', r'\1', text)  # Remove repeated lowercase
+                        text = re.sub(r'\s+', ' ', text)  # Clean up spaces
+                        
+                        cleaned_item = {
+                            'level': str(item['level']),
+                            'text': text.strip(),
+                            'page': int(item['page']) if isinstance(item['page'], (int, str)) and str(item['page']).isdigit() else 0
+                        }
+                        cleaned_outline.append(cleaned_item)
             
             result['outline'] = cleaned_outline
             return result
@@ -113,6 +150,50 @@ class PDFExtractor:
         except Exception as e:
             print(f"Error with Gemini API: {e}")
             return {"title": "", "outline": []}
+    
+    def _is_likely_heading(self, text: str) -> bool:
+        """Determine if text is likely a heading rather than regular content."""
+        text = text.strip()
+        
+        # Skip empty text
+        if not text:
+            return False
+        
+        # Skip very long text (likely paragraphs)
+        if len(text) > 200:
+            return False
+        
+        # Skip text that looks like sentences with detailed content
+        sentence_indicators = [
+            'will be', 'must be', 'is expected', 'available by',
+            'during', 'no later than', 'opportunity for',
+            'suitable for distribution', 'completed and approved'
+        ]
+        
+        text_lower = text.lower()
+        for indicator in sentence_indicators:
+            if indicator in text_lower:
+                return False
+        
+        # Skip numbered list items that are clearly content, not headings
+        if text.startswith(('1)', '2)', '3)', '4)', '5)')):
+            # Check if it contains sentence-like content
+            if any(phrase in text_lower for phrase in ['will be', 'is expected', 'must be', 'available']):
+                return False
+        
+        # Accept text that looks like headings
+        heading_indicators = [
+            text.isupper(),  # ALL CAPS
+            text.istitle(),  # Title Case
+            len(text.split()) <= 10,  # Short phrases
+            text.endswith(':'),  # Ends with colon
+            any(text.lower().startswith(prefix) for prefix in [
+                'chapter', 'section', 'part', 'appendix', 'background',
+                'summary', 'introduction', 'conclusion', 'overview'
+            ])
+        ]
+        
+        return any(heading_indicators)
     
     def process_pdf(self, pdf_path: str) -> Dict[str, Any]:
         """Process a single PDF file and extract title and outline."""
