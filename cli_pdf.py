@@ -214,12 +214,6 @@ def main():
     parser = setup_argument_parser()
     args = parser.parse_args()
     
-    # Check API key
-    if not os.getenv('GEMINI_API_KEY'):
-        print("❌ Error: GEMINI_API_KEY not found in environment variables.")
-        print("Please set your Google Gemini API key in the .env file.")
-        sys.exit(1)
-    
     # Validate input path
     input_path, input_type = validate_input_path(args.input_path)
     if not input_path:

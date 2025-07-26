@@ -273,12 +273,6 @@ def main():
     print("🤖 Powered by Google Gemini AI")
     print()
     
-    # Check if API key is configured
-    if not os.getenv('GEMINI_API_KEY'):
-        print("❌ GEMINI_API_KEY not found!")
-        print("Please configure your API key in the .env file first.")
-        return
-    
     while True:
         choice = get_user_choice()
         

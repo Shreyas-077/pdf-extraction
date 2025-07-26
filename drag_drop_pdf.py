@@ -96,13 +96,6 @@ def process_dropped_file(file_path):
 def main():
     """Main function for drag and drop processing."""
     
-    # Check API key
-    if not os.getenv('GEMINI_API_KEY'):
-        print("❌ GEMINI_API_KEY not configured!")
-        print("Please set up your Google Gemini API key in the .env file first.")
-        input("Press Enter to exit...")
-        return
-    
     # Get file path from command line arguments or user input
     if len(sys.argv) > 1:
         # File was dropped onto script or passed as argument

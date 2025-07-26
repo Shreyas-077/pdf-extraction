@@ -19,13 +19,6 @@ from utils import PDFExtractor, load_schema, validate_output
 def main():
     """Main function to process PDF files."""
     
-    # Check if Gemini API key is set
-    if not os.getenv('GEMINI_API_KEY'):
-        print("Error: GEMINI_API_KEY not found in environment variables.")
-        print("Please create a .env file with your Google Gemini API key:")
-        print("GEMINI_API_KEY=your_api_key_here")
-        sys.exit(1)
-    
     # Define paths
     input_dir = "sample_dataset/pdfs"
     output_dir = "sample_dataset/outputs"

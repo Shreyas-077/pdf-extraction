@@ -8,7 +8,7 @@
         },
         {
             "level": "H2",
-            "text": "1. Name of the Government Servant",
+            "text": "Name of the Government Servant",
             "page": 1
         },
         {
@@ -18,17 +18,17 @@
         },
         {
             "level": "H2",
-            "text": "2. Date of entering the Central Government",
+            "text": "Date of entering the Central Government",
             "page": 1
         },
         {
             "level": "H2",
-            "text": "3. Service",
+            "text": "Service",
             "page": 1
         },
         {
             "level": "H2",
-            "text": "4. PAY + SI + NPA",
+            "text": "PAY + SI + NPA",
             "page": 1
         },
         {
@@ -38,7 +38,7 @@
         },
         {
             "level": "H2",
-            "text": "5. Home Town as recorded in the Service Book",
+            "text": "Home Town as recorded in the Service Book",
             "page": 1
         },
         {
@@ -48,37 +48,62 @@
         },
         {
             "level": "H2",
-            "text": "Whether the concession is to be availed for visiting home town and if so block for which LTC is to be availed.",
+            "text": "Whether the concession is to be availed for visiting home town and if so block for which LTC is to be availed",
             "page": 1
         },
         {
             "level": "H2",
-            "text": "9. (a) If the concession is to visit anywhere in India, the place to be visited.",
+            "text": "If the concession is to visit anywhere in India, the place to be visited",
             "page": 1
         },
         {
             "level": "H2",
-            "text": "(b) Block for which to be availed.",
+            "text": "Block for which to be availed",
             "page": 1
         },
         {
             "level": "H2",
-            "text": "10. Single rail fare/bus fare from the headquarters to home town/place of visit by shortest route.",
+            "text": "Single rail fare/bus fare from the headquarters to home town/place of visit by shortest route",
             "page": 1
         },
         {
             "level": "H2",
-            "text": "11. Persons in respect of whom LTC is proposed to be availed.",
+            "text": "Persons in respect of whom LTC is proposed to be availed",
             "page": 1
         },
         {
             "level": "H3",
-            "text": "S.No Name Age Relationship",
+            "text": "SNo",
+            "page": 1
+        },
+        {
+            "level": "H3",
+            "text": "Name",
+            "page": 1
+        },
+        {
+            "level": "H3",
+            "text": "Age",
+            "page": 1
+        },
+        {
+            "level": "H3",
+            "text": "Relationship",
             "page": 1
         },
         {
             "level": "H2",
-            "text": "12. Amount of advance required. Rs.",
+            "text": "Amount of advance required Rs",
+            "page": 1
+        },
+        {
+            "level": "H2",
+            "text": "Date",
+            "page": 1
+        },
+        {
+            "level": "H2",
+            "text": "Signature of Government Servant",
             "page": 1
         }
     ]
